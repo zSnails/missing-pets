@@ -34,6 +34,41 @@ func (q *Queries) CreateMissingPet(ctx context.Context, arg CreateMissingPetPara
 	return i, err
 }
 
+const createUser = `-- name: CreateUser :one
+INSERT INTO
+pet_owners (name, phone, email, address, hash)
+VALUES (?, ?, ?, ?, ?)
+RETURNING id, name, phone, email, address, hash
+`
+
+type CreateUserParams struct {
+	Name    string
+	Phone   string
+	Email   string
+	Address string
+	Hash    []byte
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (PetOwner, error) {
+	row := q.db.QueryRowContext(ctx, createUser,
+		arg.Name,
+		arg.Phone,
+		arg.Email,
+		arg.Address,
+		arg.Hash,
+	)
+	var i PetOwner
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Phone,
+		&i.Email,
+		&i.Address,
+		&i.Hash,
+	)
+	return i, err
+}
+
 const findMissingPetsByName = `-- name: FindMissingPetsByName :many
 SELECT id, name, type, last_seen FROM
 missing_pets
@@ -67,6 +102,24 @@ func (q *Queries) FindMissingPetsByName(ctx context.Context, name string) ([]Mis
 		return nil, err
 	}
 	return items, nil
+}
+
+const findUserByEmail = `-- name: FindUserByEmail :one
+SELECT id, name, phone, email, address, hash FROM pet_owners WHERE email = ?
+`
+
+func (q *Queries) FindUserByEmail(ctx context.Context, email string) (PetOwner, error) {
+	row := q.db.QueryRowContext(ctx, findUserByEmail, email)
+	var i PetOwner
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Phone,
+		&i.Email,
+		&i.Address,
+		&i.Hash,
+	)
+	return i, err
 }
 
 const linkPetAndOwner = `-- name: LinkPetAndOwner :one
