@@ -21,11 +21,16 @@ func removeSpecialCharacters(input string) string {
 }
 
 func init() {
-	godotenv.Load()
-	gob.Register(storage.PetOwner{})
+	if err := godotenv.Load(); err != nil {
+		logrus.Errorln(err)
+	}
+	gob.Register(storage.CreateUserRow{})
 }
 
+var log = logrus.WithField("service", "entry")
+
 func main() {
+	logrus.SetReportCaller(true)
 	logrus.SetLevel(logrus.DebugLevel)
 	sql.Register("sqlite_custom", &sqlite3.SQLiteDriver{
 		Extensions: []string{},
@@ -35,14 +40,14 @@ func main() {
 	})
 	db, err := sql.Open("sqlite_custom", "data.db")
 	if err != nil {
-		panic(err)
+		log.Panic(err)
 	}
 	defer db.Close()
 
 	router := mux.NewRouter()
-	api.Register(router, storage.New(db))
+	api.Register(router, storage.New(db), db)
 
 	if err := http.ListenAndServe(":8080", router); err != nil {
-		panic(err)
+		log.Error(err)
 	}
 }
