@@ -1,0 +1,17 @@
+linters:
+  enable:
+    - usestdlibvars
+    - cyclop
+    - ireturn
+    - dupl
+    - forcetypeassert
+    - unconvert
+    - unparam
+    - wastedassign
+    - exhaustive
+    - gosmopolitan
+    - goconst
+    - gocritic
+    - gosimple
+    - govet
+    - bodyclose
