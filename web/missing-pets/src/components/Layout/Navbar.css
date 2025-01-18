@@ -1,0 +1,95 @@
+/* Reset global de márgenes y padding */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  /* Navbar base */
+  .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  /* Logo de la Navbar */
+  .navbar-logo a {
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+  }
+  
+  /* Lista de enlaces */
+  .navbar-links {
+    list-style: none;
+    display: flex;
+    gap: 15px;
+    margin: 0;
+    transition: max-height 0.3s ease-in-out;
+  }
+  
+  .navbar-links a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .navbar-links a:hover {
+    background-color: white;
+    color: #007bff;
+  }
+  
+  /* Botón del menú (hamburguesa) */
+  .navbar-toggle {
+    display: none;
+    font-size: 24px;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+  }
+  
+  /* Responsividad para pantallas pequeñas */
+  @media (max-width: 768px) {
+    .navbar {
+      flex-wrap: wrap;
+    }
+  
+    /* Botón hamburguesa visible */
+    .navbar-toggle {
+      display: block;
+    }
+  
+    /* Enlaces ocultos por defecto */
+    .navbar-links {
+      flex-direction: column;
+      max-height: 0; /* Ocultar con transición */
+      overflow: hidden;
+      width: 100%;
+      margin-top: 10px;
+    }
+  
+    /* Enlaces visibles cuando el menú está activo */
+    .navbar-links-active {
+      max-height: 300px; /* Espacio suficiente para mostrar los enlaces */
+    }
+  
+    .navbar-links li {
+      text-align: center;
+      margin: 5px 0;
+    }
+  }
+  

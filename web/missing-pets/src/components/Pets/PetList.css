@@ -1,0 +1,105 @@
+/* Contenedor principal */
+.container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: white; /* Fondo blanco */
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+}
+
+/* Título */
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Filtros */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 30px;
+  justify-content: space-between;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 45%; /* Barra de búsqueda más ancha */
+  min-width: 300px; /* Ancho mínimo aumentado */
+}
+
+.filter-group label {
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.filter-group input {
+  padding: 10px; /* Espaciado interno más grande */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px; /* Fuente más grande */
+}
+
+/* Botón de filtro */
+.filter-button {
+  align-self: center;
+  padding: 12px 24px; /* Tamaño del botón aumentado */
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.filter-button:hover {
+  background-color: #0056b3;
+}
+
+/* Listado de mascotas */
+.pet-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.pet-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  width: calc(33.333% - 20px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+  background-color: white;
+}
+
+.pet-card:hover {
+  transform: scale(1.03);
+}
+
+.pet-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.pet-card h3 {
+  margin: 10px;
+  font-size: 18px;
+}
+
+.pet-card p {
+  margin: 10px;
+  font-size: 14px;
+  color: #555;
+}
+
+.pet-meta {
+  margin: 10px;
+  font-size: 13px;
+  color: #777;
+}
