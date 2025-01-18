@@ -12,11 +12,16 @@ func RemoveUserPet(q *storage.Queries) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		petId, _ := strconv.ParseInt(vars["petId"], 10, 64)
-		err := q.RemoveUserPet(r.Context(), petId)
+
+		usrData := r.Context().Value("user-data").(storage.CreateUserRow)
+		err := q.RemoveUserPet(r.Context(), storage.RemoveUserPetParams{
+			ID:      petId,
+			OwnerID: usrData.ID,
+		})
 		if err != nil {
 			log.Errorln(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-            return
+			return
 		}
 	})
 }
