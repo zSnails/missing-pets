@@ -68,9 +68,18 @@ func Register(q *storage.Queries) http.HandlerFunc {
 		log.Debugf("Making session")
 		err = makeSession(w, r, &user)
 		if err != nil {
-			log.Debugf("Could not make session: %s\n", err.Error())
+			log.Errorf("Could not make session: %s\n", err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
+		}
+
+		err = json.NewEncoder(w).Encode(response.Response[storage.CreateUserRow]{
+			Code: http.StatusOK,
+			Data: user,
+		})
+		if err != nil {
+			log.Errorln(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
 }
