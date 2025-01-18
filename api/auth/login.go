@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/gorilla/sessions"
 	"github.com/sirupsen/logrus"
-	"github.com/zSnails/missing-pet-tracker/api/auth/cookies"
 	"github.com/zSnails/missing-pet-tracker/response"
 	"github.com/zSnails/missing-pet-tracker/storage"
 	"golang.org/x/crypto/bcrypt"
@@ -13,8 +13,8 @@ import (
 
 var log = logrus.WithField("service", "api:auth")
 
-func makeSession(w http.ResponseWriter, r *http.Request, user *storage.CreateUserRow) error {
-	sess, err := cookies.Store.Get(r, "Session")
+func makeSession(w http.ResponseWriter, r *http.Request, cookies *sessions.CookieStore, user *storage.CreateUserRow) error {
+	sess, err := cookies.Get(r, "Session")
 	if err != nil {
 		return err
 	}
@@ -34,7 +34,7 @@ func makeSession(w http.ResponseWriter, r *http.Request, user *storage.CreateUse
 	return nil
 }
 
-func Login(q *storage.Queries) http.HandlerFunc {
+func Login(q *storage.Queries, cookies *sessions.CookieStore) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		email := r.FormValue("email")
 		password := r.FormValue("password")
@@ -57,7 +57,7 @@ func Login(q *storage.Queries) http.HandlerFunc {
 		}
 
 		log.Debugln("Making session")
-		err = makeSession(w, r, &storage.CreateUserRow{
+		err = makeSession(w, r, cookies, &storage.CreateUserRow{
 			ID:      user.ID,
 			Name:    user.Name,
 			Phone:   user.Phone,
