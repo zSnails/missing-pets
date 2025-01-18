@@ -11,20 +11,33 @@ import (
 
 const createMissingPet = `-- name: CreateMissingPet :one
 INSERT INTO
-missing_pets (name, type, last_seen)
-VALUES (?, ?, ?)
+missing_pets (name, type, last_seen, owner_id)
+VALUES (?, ?, ?, ?)
 RETURNING id, name, type, last_seen
 `
 
 type CreateMissingPetParams struct {
-	Name     string
-	Type     string
-	LastSeen string
+	Name     string `json:"name"`
+	Type     string `json:"type"`
+	LastSeen string `json:"last_seen"`
+	OwnerID  int64  `json:"owner_id"`
 }
 
-func (q *Queries) CreateMissingPet(ctx context.Context, arg CreateMissingPetParams) (MissingPet, error) {
-	row := q.db.QueryRowContext(ctx, createMissingPet, arg.Name, arg.Type, arg.LastSeen)
-	var i MissingPet
+type CreateMissingPetRow struct {
+	ID       int64  `json:"id"`
+	Name     string `json:"name"`
+	Type     string `json:"type"`
+	LastSeen string `json:"last_seen"`
+}
+
+func (q *Queries) CreateMissingPet(ctx context.Context, arg CreateMissingPetParams) (CreateMissingPetRow, error) {
+	row := q.db.QueryRowContext(ctx, createMissingPet,
+		arg.Name,
+		arg.Type,
+		arg.LastSeen,
+		arg.OwnerID,
+	)
+	var i CreateMissingPetRow
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
@@ -38,18 +51,26 @@ const createUser = `-- name: CreateUser :one
 INSERT INTO
 pet_owners (name, phone, email, address, hash)
 VALUES (?, ?, ?, ?, ?)
-RETURNING id, name, phone, email, address, hash
+RETURNING id, name, phone, email, address
 `
 
 type CreateUserParams struct {
-	Name    string
-	Phone   string
-	Email   string
-	Address string
-	Hash    []byte
+	Name    string `json:"name"`
+	Phone   string `json:"phone"`
+	Email   string `json:"email"`
+	Address string `json:"address"`
+	Hash    []byte `json:"hash"`
 }
 
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (PetOwner, error) {
+type CreateUserRow struct {
+	ID      int64  `json:"id"`
+	Name    string `json:"name"`
+	Phone   string `json:"phone"`
+	Email   string `json:"email"`
+	Address string `json:"address"`
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
 	row := q.db.QueryRowContext(ctx, createUser,
 		arg.Name,
 		arg.Phone,
@@ -57,16 +78,31 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (PetOwne
 		arg.Address,
 		arg.Hash,
 	)
-	var i PetOwner
+	var i CreateUserRow
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.Phone,
 		&i.Email,
 		&i.Address,
-		&i.Hash,
 	)
 	return i, err
+}
+
+const doesUserOwnThePet = `-- name: DoesUserOwnThePet :one
+SELECT 1 FROM missing_pets WHERE id = ? AND owner_id = ?
+`
+
+type DoesUserOwnThePetParams struct {
+	ID      int64 `json:"id"`
+	OwnerID int64 `json:"owner_id"`
+}
+
+func (q *Queries) DoesUserOwnThePet(ctx context.Context, arg DoesUserOwnThePetParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, doesUserOwnThePet, arg.ID, arg.OwnerID)
+	var column_1 int64
+	err := row.Scan(&column_1)
+	return column_1, err
 }
 
 const findMissingPetsByName = `-- name: FindMissingPetsByName :many
@@ -76,15 +112,22 @@ WHERE remove_special_characters(name)
 LIKE remove_special_characters(CAST(?1 AS TEXT))
 `
 
-func (q *Queries) FindMissingPetsByName(ctx context.Context, name string) ([]MissingPet, error) {
+type FindMissingPetsByNameRow struct {
+	ID       int64  `json:"id"`
+	Name     string `json:"name"`
+	Type     string `json:"type"`
+	LastSeen string `json:"last_seen"`
+}
+
+func (q *Queries) FindMissingPetsByName(ctx context.Context, name string) ([]FindMissingPetsByNameRow, error) {
 	rows, err := q.db.QueryContext(ctx, findMissingPetsByName, name)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []MissingPet
+	items := []FindMissingPetsByNameRow{}
 	for rows.Next() {
-		var i MissingPet
+		var i FindMissingPetsByNameRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
@@ -122,28 +165,110 @@ func (q *Queries) FindUserByEmail(ctx context.Context, email string) (PetOwner, 
 	return i, err
 }
 
-const linkPetAndOwner = `-- name: LinkPetAndOwner :one
-INSERT INTO
-missing_pet_owner_rel (missing_pet_id, pet_owner_id)
-VALUES (?, ?)
-RETURNING id, missing_pet_id, pet_owner_id, "foreign"
+const findUserById = `-- name: FindUserById :one
+SELECT id, name, phone, email, address FROM pet_owners WHERE id = ?
 `
 
-type LinkPetAndOwnerParams struct {
-	MissingPetID int64
-	PetOwnerID   int64
+type FindUserByIdRow struct {
+	ID      int64  `json:"id"`
+	Name    string `json:"name"`
+	Phone   string `json:"phone"`
+	Email   string `json:"email"`
+	Address string `json:"address"`
 }
 
-func (q *Queries) LinkPetAndOwner(ctx context.Context, arg LinkPetAndOwnerParams) (MissingPetOwnerRel, error) {
-	row := q.db.QueryRowContext(ctx, linkPetAndOwner, arg.MissingPetID, arg.PetOwnerID)
-	var i MissingPetOwnerRel
+func (q *Queries) FindUserById(ctx context.Context, id int64) (FindUserByIdRow, error) {
+	row := q.db.QueryRowContext(ctx, findUserById, id)
+	var i FindUserByIdRow
 	err := row.Scan(
 		&i.ID,
-		&i.MissingPetID,
-		&i.PetOwnerID,
-		&i.Foreign,
+		&i.Name,
+		&i.Phone,
+		&i.Email,
+		&i.Address,
 	)
 	return i, err
+}
+
+const getPetByOwnerAndId = `-- name: GetPetByOwnerAndId :one
+SELECT id, name, type, last_seen FROM missing_pets WHERE id = ? AND owner_id = ?
+`
+
+type GetPetByOwnerAndIdParams struct {
+	ID      int64 `json:"id"`
+	OwnerID int64 `json:"owner_id"`
+}
+
+type GetPetByOwnerAndIdRow struct {
+	ID       int64  `json:"id"`
+	Name     string `json:"name"`
+	Type     string `json:"type"`
+	LastSeen string `json:"last_seen"`
+}
+
+func (q *Queries) GetPetByOwnerAndId(ctx context.Context, arg GetPetByOwnerAndIdParams) (GetPetByOwnerAndIdRow, error) {
+	row := q.db.QueryRowContext(ctx, getPetByOwnerAndId, arg.ID, arg.OwnerID)
+	var i GetPetByOwnerAndIdRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Type,
+		&i.LastSeen,
+	)
+	return i, err
+}
+
+const getUserPets = `-- name: GetUserPets :many
+SELECT id, name, type, last_seen FROM missing_pets WHERE owner_id = ?
+`
+
+type GetUserPetsRow struct {
+	ID       int64  `json:"id"`
+	Name     string `json:"name"`
+	Type     string `json:"type"`
+	LastSeen string `json:"last_seen"`
+}
+
+func (q *Queries) GetUserPets(ctx context.Context, ownerID int64) ([]GetUserPetsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getUserPets, ownerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetUserPetsRow{}
+	for rows.Next() {
+		var i GetUserPetsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Type,
+			&i.LastSeen,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const removeUserPet = `-- name: RemoveUserPet :exec
+DELETE FROM missing_pets WHERE id = ? AND owner_id = ?
+`
+
+type RemoveUserPetParams struct {
+	ID      int64 `json:"id"`
+	OwnerID int64 `json:"owner_id"`
+}
+
+func (q *Queries) RemoveUserPet(ctx context.Context, arg RemoveUserPetParams) error {
+	_, err := q.db.ExecContext(ctx, removeUserPet, arg.ID, arg.OwnerID)
+	return err
 }
 
 const uploadPhoto = `-- name: UploadPhoto :one
@@ -154,8 +279,8 @@ RETURNING id
 `
 
 type UploadPhotoParams struct {
-	PetID       int64
-	EncodedData string
+	PetID       int64  `json:"pet_id"`
+	EncodedData string `json:"encoded_data"`
 }
 
 func (q *Queries) UploadPhoto(ctx context.Context, arg UploadPhotoParams) (int64, error) {
