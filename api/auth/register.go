@@ -39,7 +39,7 @@ func validateRegisterParams(r *http.Request) (storage.CreateUserParams, error) {
 	}, nil
 }
 
-func Register(q *storage.Queries, cookies *sessions.CookieStore) http.HandlerFunc {
+func Register(q *storage.Queries, cookies sessions.Store) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		userData, err := validateRegisterParams(r)
 		if err != nil {

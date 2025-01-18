@@ -7,7 +7,7 @@ import (
 	"github.com/zSnails/missing-pet-tracker/storage"
 )
 
-func Logout(q *storage.Queries, cookies *sessions.CookieStore) http.HandlerFunc {
+func Logout(q *storage.Queries, cookies sessions.Store) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_, err := cookies.Get(r, "Session")
 		if err != nil {

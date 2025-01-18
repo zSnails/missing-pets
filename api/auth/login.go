@@ -34,7 +34,7 @@ func makeSession(w http.ResponseWriter, r *http.Request, cookies *sessions.Cooki
 	return nil
 }
 
-func Login(q *storage.Queries, cookies *sessions.CookieStore) http.HandlerFunc {
+func Login(q *storage.Queries, cookies sessions.Store) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		email := r.FormValue("email")
 		password := r.FormValue("password")
