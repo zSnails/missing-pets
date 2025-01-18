@@ -51,15 +51,31 @@ func Login(q *storage.Queries) http.HandlerFunc {
 		log.Debugln("Comparing stored hash with given password")
 		err = bcrypt.CompareHashAndPassword(user.Hash, []byte(password))
 		if err != nil {
-			log.Debugf("Could not compare: %s\n", err.Error())
+			log.Errorf("Could not compare: %s\n", err.Error())
 			http.Error(w, err.Error(), http.StatusForbidden)
 			return
 		}
 
 		log.Debugln("Making session")
-		err = makeSession(w, r, &user)
+		err = makeSession(w, r, &storage.CreateUserRow{
+			ID:      user.ID,
+			Name:    user.Name,
+			Phone:   user.Phone,
+			Email:   user.Email,
+			Address: user.Address,
+		})
 		if err != nil {
-			log.Debugf("Could not make session: %s\n", err.Error())
+			log.Errorf("Could not make session: %s\n", err.Error())
+			http.Error(w, err.Error(), http.StatusForbidden)
+			return
+		}
+
+		err = json.NewEncoder(w).Encode(response.Response[storage.PetOwner]{
+			Code: http.StatusOK,
+			Data: user,
+		})
+		if err != nil {
+			log.Errorln(err)
 			http.Error(w, err.Error(), http.StatusForbidden)
 			return
 		}
