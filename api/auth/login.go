@@ -36,13 +36,13 @@ func makeSession(w http.ResponseWriter, r *http.Request, user *storage.CreateUse
 
 func Login(q *storage.Queries) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		email := r.PostForm.Get("email")
-		password := r.PostForm.Get("password")
+		email := r.FormValue("email")
+		password := r.FormValue("password")
 
 		log.Debugln("Searching for user in database")
 		user, err := q.FindUserByEmail(r.Context(), email)
 		if err != nil {
-			log.Debugf("Error: %s\n", err.Error())
+			log.Errorf("Error: %s\n", err.Error())
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
