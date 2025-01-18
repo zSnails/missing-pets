@@ -19,15 +19,15 @@ RETURNING id, name, type, last_seen
 type CreateMissingPetParams struct {
 	Name     string `json:"name"`
 	Type     string `json:"type"`
-	LastSeen string `json:"last_seen"`
-	OwnerID  int64  `json:"owner_id"`
+	LastSeen string `json:"lastSeen"`
+	OwnerID  int64  `json:"ownerId"`
 }
 
 type CreateMissingPetRow struct {
 	ID       int64  `json:"id"`
 	Name     string `json:"name"`
 	Type     string `json:"type"`
-	LastSeen string `json:"last_seen"`
+	LastSeen string `json:"lastSeen"`
 }
 
 func (q *Queries) CreateMissingPet(ctx context.Context, arg CreateMissingPetParams) (CreateMissingPetRow, error) {
@@ -95,7 +95,7 @@ SELECT 1 FROM missing_pets WHERE id = ? AND owner_id = ?
 
 type DoesUserOwnThePetParams struct {
 	ID      int64 `json:"id"`
-	OwnerID int64 `json:"owner_id"`
+	OwnerID int64 `json:"ownerId"`
 }
 
 func (q *Queries) DoesUserOwnThePet(ctx context.Context, arg DoesUserOwnThePetParams) (int64, error) {
@@ -116,7 +116,7 @@ type FindMissingPetsByNameRow struct {
 	ID       int64  `json:"id"`
 	Name     string `json:"name"`
 	Type     string `json:"type"`
-	LastSeen string `json:"last_seen"`
+	LastSeen string `json:"lastSeen"`
 }
 
 func (q *Queries) FindMissingPetsByName(ctx context.Context, name string) ([]FindMissingPetsByNameRow, error) {
@@ -208,8 +208,8 @@ type GetAllPetsNameFilterRow struct {
 	ID       int64  `json:"id"`
 	Name     string `json:"name"`
 	Type     string `json:"type"`
-	LastSeen string `json:"last_seen"`
-	OwnerID  int64  `json:"owner_id"`
+	LastSeen string `json:"lastSeen"`
+	OwnerID  int64  `json:"ownerId"`
 }
 
 func (q *Queries) GetAllPetsNameFilter(ctx context.Context, arg GetAllPetsNameFilterParams) ([]GetAllPetsNameFilterRow, error) {
@@ -247,14 +247,14 @@ SELECT id, name, type, last_seen FROM missing_pets WHERE id = ? AND owner_id = ?
 
 type GetPetByOwnerAndIdParams struct {
 	ID      int64 `json:"id"`
-	OwnerID int64 `json:"owner_id"`
+	OwnerID int64 `json:"ownerId"`
 }
 
 type GetPetByOwnerAndIdRow struct {
 	ID       int64  `json:"id"`
 	Name     string `json:"name"`
 	Type     string `json:"type"`
-	LastSeen string `json:"last_seen"`
+	LastSeen string `json:"lastSeen"`
 }
 
 func (q *Queries) GetPetByOwnerAndId(ctx context.Context, arg GetPetByOwnerAndIdParams) (GetPetByOwnerAndIdRow, error) {
@@ -277,7 +277,7 @@ type GetUserPetsRow struct {
 	ID       int64  `json:"id"`
 	Name     string `json:"name"`
 	Type     string `json:"type"`
-	LastSeen string `json:"last_seen"`
+	LastSeen string `json:"lastSeen"`
 }
 
 func (q *Queries) GetUserPets(ctx context.Context, ownerID int64) ([]GetUserPetsRow, error) {
@@ -314,7 +314,7 @@ DELETE FROM missing_pets WHERE id = ? AND owner_id = ?
 
 type RemoveUserPetParams struct {
 	ID      int64 `json:"id"`
-	OwnerID int64 `json:"owner_id"`
+	OwnerID int64 `json:"ownerId"`
 }
 
 func (q *Queries) RemoveUserPet(ctx context.Context, arg RemoveUserPetParams) error {
@@ -330,8 +330,8 @@ RETURNING id
 `
 
 type UploadPhotoParams struct {
-	PetID       int64  `json:"pet_id"`
-	EncodedData string `json:"encoded_data"`
+	PetID       int64  `json:"petId"`
+	EncodedData string `json:"encodedData"`
 }
 
 func (q *Queries) UploadPhoto(ctx context.Context, arg UploadPhotoParams) (int64, error) {

@@ -8,14 +8,14 @@ type MissingPet struct {
 	ID       int64  `json:"id"`
 	Name     string `json:"name"`
 	Type     string `json:"type"`
-	LastSeen string `json:"last_seen"`
-	OwnerID  int64  `json:"owner_id"`
+	LastSeen string `json:"lastSeen"`
+	OwnerID  int64  `json:"ownerId"`
 }
 
 type MissingPetPhoto struct {
 	ID          int64  `json:"id"`
-	PetID       int64  `json:"pet_id"`
-	EncodedData string `json:"encoded_data"`
+	PetID       int64  `json:"petId"`
+	EncodedData string `json:"encodedData"`
 }
 
 type PetOwner struct {
