@@ -39,3 +39,10 @@ DELETE FROM missing_pets WHERE id = ? AND owner_id = ?;
 
 -- name: GetPetByOwnerAndId :one
 SELECT id, name, type, last_seen FROM missing_pets WHERE id = ? AND owner_id = ?;
+
+-- name: GetAllPetsNameFilter :many
+SELECT missing_pets.id, missing_pets.name, missing_pets.type, missing_pets.last_seen, pet_owners.id as owner_id
+FROM missing_pets 
+JOIN pet_owners ON missing_pets.owner_id = pet_owners.id
+WHERE (missing_pets.name LIKE CAST(sqlc.arg(name) AS TEXT))
+LIMIT sqlc.arg(limit) OFFSET sqlc.arg(offset);

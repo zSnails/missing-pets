@@ -190,6 +190,57 @@ func (q *Queries) FindUserById(ctx context.Context, id int64) (FindUserByIdRow, 
 	return i, err
 }
 
+const getAllPetsNameFilter = `-- name: GetAllPetsNameFilter :many
+SELECT missing_pets.id, missing_pets.name, missing_pets.type, missing_pets.last_seen, pet_owners.id as owner_id
+FROM missing_pets 
+JOIN pet_owners ON missing_pets.owner_id = pet_owners.id
+WHERE (missing_pets.name LIKE CAST(?1 AS TEXT))
+LIMIT ?3 OFFSET ?2
+`
+
+type GetAllPetsNameFilterParams struct {
+	Name   string `json:"name"`
+	Offset int64  `json:"offset"`
+	Limit  int64  `json:"limit"`
+}
+
+type GetAllPetsNameFilterRow struct {
+	ID       int64  `json:"id"`
+	Name     string `json:"name"`
+	Type     string `json:"type"`
+	LastSeen string `json:"last_seen"`
+	OwnerID  int64  `json:"owner_id"`
+}
+
+func (q *Queries) GetAllPetsNameFilter(ctx context.Context, arg GetAllPetsNameFilterParams) ([]GetAllPetsNameFilterRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllPetsNameFilter, arg.Name, arg.Offset, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetAllPetsNameFilterRow{}
+	for rows.Next() {
+		var i GetAllPetsNameFilterRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Type,
+			&i.LastSeen,
+			&i.OwnerID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getPetByOwnerAndId = `-- name: GetPetByOwnerAndId :one
 SELECT id, name, type, last_seen FROM missing_pets WHERE id = ? AND owner_id = ?
 `
