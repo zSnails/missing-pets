@@ -1,28 +1,28 @@
 package auth
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/sirupsen/logrus"
 	"github.com/zSnails/missing-pet-tracker/api/auth/cookies"
+	"github.com/zSnails/missing-pet-tracker/response"
 	"github.com/zSnails/missing-pet-tracker/storage"
 	"golang.org/x/crypto/bcrypt"
 )
 
 var log = logrus.WithField("service", "api:auth")
 
-func makeSession(w http.ResponseWriter, r *http.Request, user *storage.PetOwner) error {
-	user.Hash = nil //  for security reasons, we can't disclose this hash nor its salt
-
+func makeSession(w http.ResponseWriter, r *http.Request, user *storage.CreateUserRow) error {
 	sess, err := cookies.Store.Get(r, "Session")
 	if err != nil {
 		return err
 	}
 
 	sess.Options.HttpOnly = true
+	sess.Options.Path = "/"
 	sess.Options.MaxAge = 3600
 	sess.Options.SameSite = http.SameSiteLaxMode
-	// sess.Options.Secure = true
 
 	sess.Values["user-data"] = user
 
