@@ -30,4 +30,5 @@ type PetOwner struct {
 	Phone   string
 	Email   string
 	Address string
+	Hash    []byte
 }

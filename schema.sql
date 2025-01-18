@@ -3,7 +3,8 @@ CREATE TABLE pet_owners (
     name TEXT NOT NULL,
     phone TEXT NOT NULL UNIQUE,
     email TEXT NOT NULL UNIQUE,
-    address TEXT NOT NULL
+    address TEXT NOT NULL,
+    hash BLOB NOT NULL
 );
 
 CREATE INDEX IF NOT EXISTS pet_owners_email_idx ON pet_owners (email);

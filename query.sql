@@ -21,3 +21,12 @@ INSERT INTO
 missing_pet_photos (pet_id, encoded_data)
 VALUES (?, ?)
 RETURNING id;
+
+-- name: FindUserByEmail :one
+SELECT * FROM pet_owners WHERE email = ?;
+
+-- name: CreateUser :one
+INSERT INTO
+pet_owners (name, phone, email, address, hash)
+VALUES (?, ?, ?, ?, ?)
+RETURNING *;
