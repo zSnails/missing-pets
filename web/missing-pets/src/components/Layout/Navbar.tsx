@@ -15,12 +15,10 @@ const Navbar: React.FC = () => {
         <Link to="/">🐾 Mascotas Perdidas</Link>
       </div>
 
-      {/* Botón del menú hamburguesa */}
       <button className="navbar-toggle" onClick={toggleMenu}>
         ☰
       </button>
 
-      {/* Enlaces del menú */}
       <ul className={`navbar-links ${isMenuOpen ? "navbar-links-active" : ""}`}>
         <li>
           <Link to="/lost-pets" onClick={() => setIsMenuOpen(false)}>

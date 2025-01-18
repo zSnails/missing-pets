@@ -2,14 +2,14 @@ import React, { useState } from "react";
 import "./SearchBar.css";
 
 interface SearchBarProps {
-  onSearch: (searchTerm: string) => void; // Función que se ejecutará al buscar
+  onSearch: (searchTerm: string) => void;
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const handleSearch = () => {
-    onSearch(searchTerm); // Llama a la función pasada como prop con el término de búsqueda
+    onSearch(searchTerm);
   };
 
   return (

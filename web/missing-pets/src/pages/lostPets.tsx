@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import "./LostPets.css";
-import SearchBar from "../components/Shared/searchBar";
-import Card from "../components/Shared/Card"; 
+import SearchBar from "../components/Shared/SearchBar";
+import Card from "../components/Shared/Card";
 
-// Datos de prueba
 const mockPets = [
   {
     id: "1",
@@ -12,7 +11,7 @@ const mockPets = [
     breed: "Labrador Retriever",
     color: "Amarillo",
     size: "Grande",
-    image: "https://images.unsplash.com/photo-1574158622682-e40e69881006"
+    image: "https://images.unsplash.com/photo-1574158622682-e40e69881006",
   },
   {
     id: "2",
@@ -21,17 +20,8 @@ const mockPets = [
     breed: "Pastor Alemán",
     color: "Negro y Marrón",
     size: "Grande",
-    image: "https://images.unsplash.com/photo-1517423440428-a5a00ad493e8"
+    image: "https://images.unsplash.com/photo-1558788353-f76d92427f16",
   },
-  {
-    id: "3",
-    name: "Bella",
-    lastSeenLocation: "Plaza Independencia, Montevideo",
-    breed: "Beagle",
-    color: "Blanco y Marrón",
-    size: "Mediano",
-    image: "https://images.unsplash.com/photo-1558788353-f76d92427f16"
-  }
 ];
 
 const LostPets: React.FC = () => {
@@ -47,26 +37,18 @@ const LostPets: React.FC = () => {
   return (
     <div className="lost-pets-container">
       <h1>Mascotas Perdidas</h1>
-      {/* Usamos el componente de búsqueda */}
       <SearchBar onSearch={handleSearch} />
       <div className="pet-list">
-        {filteredPets.length > 0 ? (
-          filteredPets.map((pet) => (
-            <Card
-              key={pet.id}
-              image={pet.image}
-              title={pet.name}
-              description={`Última ubicación: ${pet.lastSeenLocation}`}
-              details={[
-                `Raza: ${pet.breed}`,
-                `Color: ${pet.color}`,
-                `Tamaño: ${pet.size}`
-              ]}
-            />
-          ))
-        ) : (
-          <p>No se encontraron mascotas.</p>
-        )}
+        {filteredPets.map((pet) => (
+          <Card
+            key={pet.id}
+            id={pet.id}
+            image={pet.image}
+            title={pet.name}
+            description={`Último lugar visto: ${pet.lastSeenLocation}`}
+            details={[`Raza: ${pet.breed}`, `Color: ${pet.color}`, `Tamaño: ${pet.size}`]}
+          />
+        ))}
       </div>
     </div>
   );

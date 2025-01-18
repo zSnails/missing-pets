@@ -12,13 +12,11 @@ const Register: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validación de contraseñas
     if (password !== confirmPassword) {
       alert("Las contraseñas no coinciden");
       return;
     }
 
-    // Aquí podrías enviar los datos al backend
     console.log("Registrando usuario:", {
       name,
       email,

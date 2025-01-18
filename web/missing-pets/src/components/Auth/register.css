@@ -1,7 +1,7 @@
-/* Contenedor principal */
+
 .register-container {
     max-width: 400px;
-    margin: 80px auto; /* Espacio superior para evitar la Navbar */
+    margin: 80px auto; 
     background-color: white;
     padding: 20px;
     border-radius: 8px;
@@ -9,14 +9,12 @@
     text-align: center;
   }
   
-  /* Título */
   .register-container h1 {
     font-size: 28px;
     color: #333;
     margin-bottom: 20px;
   }
   
-  /* Formulario */
   .register-form {
     display: flex;
     flex-direction: column;
@@ -42,7 +40,6 @@
     border-radius: 4px;
   }
   
-  /* Botón de registro */
   .register-button {
     padding: 10px 20px;
     font-size: 16px;
@@ -58,7 +55,6 @@
     background-color: #0056b3;
   }
   
-  /* Pie de formulario */
   .register-footer {
     margin-top: 15px;
     font-size: 14px;

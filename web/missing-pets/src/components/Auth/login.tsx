@@ -8,7 +8,6 @@ const Login: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Iniciando sesión con:", { email, password });
-    // Aquí puedes agregar la lógica para enviar los datos al backend
   };
 
   return (
