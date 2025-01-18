@@ -13,7 +13,7 @@ import (
 
 var log = logrus.WithField("service", "api:auth")
 
-func makeSession(w http.ResponseWriter, r *http.Request, cookies *sessions.CookieStore, user *storage.CreateUserRow) error {
+func makeSession(w http.ResponseWriter, r *http.Request, cookies sessions.Store, user *storage.CreateUserRow) error {
 	sess, err := cookies.Get(r, "Session")
 	if err != nil {
 		return err
@@ -34,7 +34,7 @@ func makeSession(w http.ResponseWriter, r *http.Request, cookies *sessions.Cooki
 	return nil
 }
 
-func Login(q *storage.Queries, cookies *sessions.CookieStore) http.HandlerFunc {
+func Login(q *storage.Queries, cookies sessions.Store) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		email := r.FormValue("email")
 		password := r.FormValue("password")
