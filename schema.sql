@@ -9,21 +9,13 @@ CREATE TABLE pet_owners (
 
 CREATE INDEX IF NOT EXISTS pet_owners_email_idx ON pet_owners (email);
 
-CREATE TABLE missing_pet_owner_rel (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    missing_pet_id INT NOT NULL,
-    pet_owner_id INT NOT NULL,
-    FOREIGN KEY (missing_pet_id) REFERENCES missing_pets(id) ON DELETE CASCADE ON UPDATE CASCADE
-    FOREIGN KEY (pet_owner_id) REFERENCES pet_owners(id) ON DELETE CASCADE ON UPDATE CASCADE
-);
-
-CREATE INDEX IF NOT EXISTS missing_pet_owner_idx ON missing_pet_owner_rel (missing_pet_id, pet_owner_id);
-
 CREATE TABLE missing_pets (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     type TEXT NOT NULL,
-    last_seen TEXT NOT NULL
+    last_seen TEXT NOT NULL,
+    owner_id INTEGER NOT NULL,
+    FOREIGN KEY (owner_id) REFERENCES pet_owners (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE INDEX IF NOT EXISTS missing_pets_idx ON missing_pets (name, type, last_seen);
