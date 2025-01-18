@@ -38,7 +38,7 @@ func listPets(w http.ResponseWriter, r *http.Request, q *storage.Queries, userID
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = json.NewEncoder(w).Encode(response.Response[[]storage.MissingPet]{
+	err = json.NewEncoder(w).Encode(response.Response[[]storage.GetUserPetsRow]{
 		Code: http.StatusOK,
 		Data: pets,
 	})
