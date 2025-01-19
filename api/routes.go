@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -12,14 +13,24 @@ import (
 
 var log = logrus.WithField("service", "api")
 
-func Register(r *mux.Router, q *storage.Queries) {
+func Register(r *mux.Router, queries *storage.Queries, db *sql.DB) {
+	cookies := MakeStore()
 	r.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Errorf("route not found %s\n", r.URL.Path)
 		http.Error(w, "Not Found", http.StatusNotFound)
 	})
-	r.Handle("/api/users/{id}/pets", pets.RegisterPet(q)).Methods("POST")
-	// TODO: other crud operations
+	r.Use(logger)
 
-	r.Handle("/api/auth/login", auth.Login(q)).Methods("POST")
-	r.Handle("/api/auth/register", auth.Register(q)).Methods("POST")
+	r.Handle("/api/auth/login", auth.Login(queries, cookies)).Methods("POST")
+	r.Handle("/api/auth/login", auth.Logout(queries, cookies)).Methods("DELETE")
+	r.Handle("/api/auth/register", auth.Register(queries, cookies)).Methods("POST")
+	r.Handle("/api/users/{id}/pets", pets.ListUserPets(queries)).Methods("GET")
+	r.Handle("/api/pets", pets.ListAllPetsFilter(queries)).Methods("GET")
+
+	api := r.PathPrefix("/api").Subrouter()
+	api.Use(authenticated(cookies))
+	api.Handle("/me/pets", pets.RegisterUserPet(queries, db)).Methods("POST")
+	api.Handle("/me/pets", pets.ListMyPets(queries)).Methods("GET")
+	api.Handle("/me/pets/{petId}", pets.GetPet(queries)).Methods("GET")
+	api.Handle("/me/pets/{petId}", pets.RemoveUserPet(queries)).Methods("DELETE")
 }

@@ -1,28 +1,28 @@
 package auth
 
 import (
+	"encoding/json"
 	"net/http"
 
+	"github.com/gorilla/sessions"
 	"github.com/sirupsen/logrus"
-	"github.com/zSnails/missing-pet-tracker/api/auth/cookies"
+	"github.com/zSnails/missing-pet-tracker/response"
 	"github.com/zSnails/missing-pet-tracker/storage"
 	"golang.org/x/crypto/bcrypt"
 )
 
 var log = logrus.WithField("service", "api:auth")
 
-func makeSession(w http.ResponseWriter, r *http.Request, user *storage.PetOwner) error {
-	user.Hash = nil //  for security reasons, we can't disclose this hash nor its salt
-
-	sess, err := cookies.Store.Get(r, "Session")
+func makeSession(w http.ResponseWriter, r *http.Request, cookies sessions.Store, user *storage.CreateUserRow) error {
+	sess, err := cookies.Get(r, "Session")
 	if err != nil {
 		return err
 	}
 
 	sess.Options.HttpOnly = true
+	sess.Options.Path = "/"
 	sess.Options.MaxAge = 3600
 	sess.Options.SameSite = http.SameSiteLaxMode
-	// sess.Options.Secure = true
 
 	sess.Values["user-data"] = user
 
@@ -34,15 +34,15 @@ func makeSession(w http.ResponseWriter, r *http.Request, user *storage.PetOwner)
 	return nil
 }
 
-func Login(q *storage.Queries) http.HandlerFunc {
+func Login(q *storage.Queries, cookies sessions.Store) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		email := r.PostForm.Get("email")
-		password := r.PostForm.Get("password")
+		email := r.FormValue("email")
+		password := r.FormValue("password")
 
 		log.Debugln("Searching for user in database")
 		user, err := q.FindUserByEmail(r.Context(), email)
 		if err != nil {
-			log.Debugf("Error: %s\n", err.Error())
+			log.Errorf("Error: %s\n", err.Error())
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
@@ -51,15 +51,31 @@ func Login(q *storage.Queries) http.HandlerFunc {
 		log.Debugln("Comparing stored hash with given password")
 		err = bcrypt.CompareHashAndPassword(user.Hash, []byte(password))
 		if err != nil {
-			log.Debugf("Could not compare: %s\n", err.Error())
+			log.Errorf("Could not compare: %s\n", err.Error())
 			http.Error(w, err.Error(), http.StatusForbidden)
 			return
 		}
 
 		log.Debugln("Making session")
-		err = makeSession(w, r, &user)
+		err = makeSession(w, r, cookies, &storage.CreateUserRow{
+			ID:      user.ID,
+			Name:    user.Name,
+			Phone:   user.Phone,
+			Email:   user.Email,
+			Address: user.Address,
+		})
 		if err != nil {
-			log.Debugf("Could not make session: %s\n", err.Error())
+			log.Errorf("Could not make session: %s\n", err.Error())
+			http.Error(w, err.Error(), http.StatusForbidden)
+			return
+		}
+
+		err = json.NewEncoder(w).Encode(response.Response[storage.PetOwner]{
+			Code: http.StatusOK,
+			Data: user,
+		})
+		if err != nil {
+			log.Errorln(err)
 			http.Error(w, err.Error(), http.StatusForbidden)
 			return
 		}

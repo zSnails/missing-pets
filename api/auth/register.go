@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/gorilla/sessions"
 	"github.com/zSnails/missing-pet-tracker/response"
 	"github.com/zSnails/missing-pet-tracker/storage"
 	"golang.org/x/crypto/bcrypt"
@@ -38,7 +39,7 @@ func validateRegisterParams(r *http.Request) (storage.CreateUserParams, error) {
 	}, nil
 }
 
-func Register(q *storage.Queries) http.HandlerFunc {
+func Register(q *storage.Queries, cookies sessions.Store) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		userData, err := validateRegisterParams(r)
 		if err != nil {
@@ -66,11 +67,20 @@ func Register(q *storage.Queries) http.HandlerFunc {
 		}
 
 		log.Debugf("Making session")
-		err = makeSession(w, r, &user)
+		err = makeSession(w, r, cookies, &user)
 		if err != nil {
-			log.Debugf("Could not make session: %s\n", err.Error())
+			log.Errorf("Could not make session: %s\n", err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
+		}
+
+		err = json.NewEncoder(w).Encode(response.Response[storage.CreateUserRow]{
+			Code: http.StatusOK,
+			Data: user,
+		})
+		if err != nil {
+			log.Errorln(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
 }

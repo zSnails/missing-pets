@@ -5,30 +5,24 @@
 package storage
 
 type MissingPet struct {
-	ID       int64
-	Name     string
-	Type     string
-	LastSeen string
-}
-
-type MissingPetOwnerRel struct {
-	ID           int64
-	MissingPetID int64
-	PetOwnerID   int64
-	Foreign      interface{}
+	ID       int64  `json:"id"`
+	Name     string `json:"name"`
+	Type     string `json:"type"`
+	LastSeen string `json:"lastSeen"`
+	OwnerID  int64  `json:"ownerId"`
 }
 
 type MissingPetPhoto struct {
-	ID          int64
-	PetID       int64
-	EncodedData string
+	ID          int64  `json:"id"`
+	PetID       int64  `json:"petId"`
+	EncodedData []byte `json:"encodedData"`
 }
 
 type PetOwner struct {
-	ID      int64
-	Name    string
-	Phone   string
-	Email   string
-	Address string
-	Hash    []byte
+	ID      int64  `json:"id"`
+	Name    string `json:"name"`
+	Phone   string `json:"phone"`
+	Email   string `json:"email"`
+	Address string `json:"address"`
+	Hash    []byte `json:"hash"`
 }
