@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./AddPet.css";
+import "./addPet.css";
 
 const AddPet: React.FC = () => {
   const [petName, setPetName] = useState("");
