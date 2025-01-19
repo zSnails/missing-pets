@@ -43,9 +43,14 @@ func main() {
 		log.Panic(err)
 	}
 	defer db.Close()
+    if _, err = db.Exec("PRAGMA foreign_keys = ON;"); err != nil {
+        log.Panic(err)
+    }
 
 	router := mux.NewRouter()
 	api.Register(router, storage.New(db), db)
+
+	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))
 
 	if err := http.ListenAndServe(":8080", router); err != nil {
 		log.Error(err)
