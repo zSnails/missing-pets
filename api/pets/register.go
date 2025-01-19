@@ -2,8 +2,11 @@ package pets
 
 import (
 	"database/sql"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"io"
+	"mime/multipart"
 	"net/http"
 
 	"github.com/sirupsen/logrus"
@@ -35,8 +38,29 @@ func validatePetData(r *http.Request) (storage.CreateMissingPetParams, error) {
 	}, nil
 }
 
-func RegisterUserPet(q *storage.Queries, db *sql.DB) http.HandlerFunc {
+const MB32 = 32 << 20
+
+func getFormFiles(r *http.Request, fieldName string) ([]*multipart.FileHeader, error) {
+	if r.MultipartForm == nil {
+		if err := r.ParseMultipartForm(MB32); err != nil {
+			return nil, err
+		}
+	}
+	return r.MultipartForm.File[fieldName], nil
+}
+
+func RegisterUserPet(h *storage.Queries, db *sql.DB) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		tx, err := db.BeginTx(r.Context(), nil)
+		if err != nil {
+			log.Errorln(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer tx.Rollback()
+
+		q := h.WithTx(tx)
+
 		usrData := r.Context().Value("user-data").(storage.CreateUserRow)
 
 		petData, err := validatePetData(r)
@@ -54,11 +78,45 @@ func RegisterUserPet(q *storage.Queries, db *sql.DB) http.HandlerFunc {
 			return
 		}
 
+		if r.MultipartForm != nil {
+			headers, err := getFormFiles(r, "images")
+			if err != nil {
+				log.Errorln(err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			for _, header := range headers {
+				func() {
+					file, err := header.Open()
+					if err != nil {
+						log.Errorln(err)
+						return
+					}
+					defer file.Close()
+
+					read, err := io.ReadAll(file)
+					data := base64.RawStdEncoding.EncodeToString(read)
+					if _, err = q.UploadPhoto(r.Context(), storage.UploadPhotoParams{
+						PetID:       pet.ID,
+						EncodedData: []byte(data),
+					}); err != nil {
+						log.Errorln(err)
+					}
+				}()
+			}
+		}
+
 		err = json.NewEncoder(w).Encode(response.Response[storage.CreateMissingPetRow]{
 			Code: http.StatusOK,
 			Data: pet,
 		})
 		if err != nil {
+			log.Errorln(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if err = tx.Commit(); err != nil {
 			log.Errorln(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
