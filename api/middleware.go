@@ -18,7 +18,6 @@ func logger(h http.Handler) http.Handler {
 			"referer": r.Referer(),
 			"method":  r.Method,
 		}).Infoln()
-		w.WriteHeader(http.StatusTeapot)
 		h.ServeHTTP(w, r)
 	})
 }
