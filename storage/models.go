@@ -15,7 +15,7 @@ type MissingPet struct {
 type MissingPetPhoto struct {
 	ID          int64  `json:"id"`
 	PetID       int64  `json:"petId"`
-	EncodedData string `json:"encodedData"`
+	EncodedData []byte `json:"encodedData"`
 }
 
 type PetOwner struct {

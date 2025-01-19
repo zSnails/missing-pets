@@ -331,7 +331,7 @@ RETURNING id
 
 type UploadPhotoParams struct {
 	PetID       int64  `json:"petId"`
-	EncodedData string `json:"encodedData"`
+	EncodedData []byte `json:"encodedData"`
 }
 
 func (q *Queries) UploadPhoto(ctx context.Context, arg UploadPhotoParams) (int64, error) {

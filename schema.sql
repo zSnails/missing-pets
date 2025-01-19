@@ -23,7 +23,7 @@ CREATE INDEX IF NOT EXISTS missing_pets_idx ON missing_pets (name, type, last_se
 CREATE TABLE missing_pet_photos (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     pet_id INT NOT NULL,
-    encoded_data TEXT NOT NULL,
+    encoded_data BLOB NOT NULL,
     FOREIGN KEY (pet_id) REFERENCES missing_pets(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
