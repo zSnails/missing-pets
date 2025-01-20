@@ -11,15 +11,17 @@ import (
 
 const createMissingPet = `-- name: CreateMissingPet :one
 INSERT INTO
-missing_pets (name, type, last_seen, owner_id)
-VALUES (?, ?, ?, ?)
-RETURNING id, name, type, last_seen
+missing_pets (name, type, last_seen, size, color, owner_id)
+VALUES (?, ?, ?, ?, ?, ?)
+RETURNING id, name, type, last_seen, size, color
 `
 
 type CreateMissingPetParams struct {
 	Name     string `json:"name"`
 	Type     string `json:"type"`
 	LastSeen string `json:"lastSeen"`
+	Size     string `json:"size"`
+	Color    string `json:"color"`
 	OwnerID  int64  `json:"ownerId"`
 }
 
@@ -28,6 +30,8 @@ type CreateMissingPetRow struct {
 	Name     string `json:"name"`
 	Type     string `json:"type"`
 	LastSeen string `json:"lastSeen"`
+	Size     string `json:"size"`
+	Color    string `json:"color"`
 }
 
 func (q *Queries) CreateMissingPet(ctx context.Context, arg CreateMissingPetParams) (CreateMissingPetRow, error) {
@@ -35,6 +39,8 @@ func (q *Queries) CreateMissingPet(ctx context.Context, arg CreateMissingPetPara
 		arg.Name,
 		arg.Type,
 		arg.LastSeen,
+		arg.Size,
+		arg.Color,
 		arg.OwnerID,
 	)
 	var i CreateMissingPetRow
@@ -43,6 +49,8 @@ func (q *Queries) CreateMissingPet(ctx context.Context, arg CreateMissingPetPara
 		&i.Name,
 		&i.Type,
 		&i.LastSeen,
+		&i.Size,
+		&i.Color,
 	)
 	return i, err
 }
@@ -106,7 +114,7 @@ func (q *Queries) DoesUserOwnThePet(ctx context.Context, arg DoesUserOwnThePetPa
 }
 
 const findMissingPetsByName = `-- name: FindMissingPetsByName :many
-SELECT id, name, type, last_seen FROM
+SELECT id, name, type, last_seen, size, color FROM
 missing_pets
 WHERE remove_special_characters(name)
 LIKE remove_special_characters(CAST(?1 AS TEXT))
@@ -117,6 +125,8 @@ type FindMissingPetsByNameRow struct {
 	Name     string `json:"name"`
 	Type     string `json:"type"`
 	LastSeen string `json:"lastSeen"`
+	Size     string `json:"size"`
+	Color    string `json:"color"`
 }
 
 func (q *Queries) FindMissingPetsByName(ctx context.Context, name string) ([]FindMissingPetsByNameRow, error) {
@@ -133,6 +143,8 @@ func (q *Queries) FindMissingPetsByName(ctx context.Context, name string) ([]Fin
 			&i.Name,
 			&i.Type,
 			&i.LastSeen,
+			&i.Size,
+			&i.Color,
 		); err != nil {
 			return nil, err
 		}
@@ -191,7 +203,8 @@ func (q *Queries) FindUserById(ctx context.Context, id int64) (FindUserByIdRow, 
 }
 
 const getAllPetsNameFilter = `-- name: GetAllPetsNameFilter :many
-SELECT missing_pets.id, missing_pets.name, missing_pets.type, missing_pets.last_seen, pet_owners.id as owner_id
+SELECT missing_pets.id, missing_pets.name, missing_pets.type, missing_pets.last_seen, missing_pets.size, missing_pets.color, pet_owners.id as owner_id,
+(SELECT api_hash FROM missing_pet_photos WHERE pet_id = missing_pets.id LIMIT 1)
 FROM missing_pets 
 JOIN pet_owners ON missing_pets.owner_id = pet_owners.id
 WHERE (missing_pets.name LIKE CAST(?1 AS TEXT))
@@ -209,7 +222,10 @@ type GetAllPetsNameFilterRow struct {
 	Name     string `json:"name"`
 	Type     string `json:"type"`
 	LastSeen string `json:"lastSeen"`
+	Size     string `json:"size"`
+	Color    string `json:"color"`
 	OwnerID  int64  `json:"ownerId"`
+	ApiHash  string `json:"apiHash"`
 }
 
 func (q *Queries) GetAllPetsNameFilter(ctx context.Context, arg GetAllPetsNameFilterParams) ([]GetAllPetsNameFilterRow, error) {
@@ -226,7 +242,10 @@ func (q *Queries) GetAllPetsNameFilter(ctx context.Context, arg GetAllPetsNameFi
 			&i.Name,
 			&i.Type,
 			&i.LastSeen,
+			&i.Size,
+			&i.Color,
 			&i.OwnerID,
+			&i.ApiHash,
 		); err != nil {
 			return nil, err
 		}
@@ -250,6 +269,10 @@ type GetPetByIDRow struct {
 	Name     string `json:"name"`
 	Type     string `json:"type"`
 	LastSeen string `json:"lastSeen"`
+	Size     string `json:"size"`
+	Color    string `json:"color"`
+	OwnerID  int64  `json:"ownerId"`
+	ApiHash  string `json:"apiHash"`
 }
 
 func (q *Queries) GetPetByID(ctx context.Context, id int64) (GetPetByIDRow, error) {
@@ -260,12 +283,16 @@ func (q *Queries) GetPetByID(ctx context.Context, id int64) (GetPetByIDRow, erro
 		&i.Name,
 		&i.Type,
 		&i.LastSeen,
+		&i.Size,
+		&i.Color,
+		&i.OwnerID,
+		&i.ApiHash,
 	)
 	return i, err
 }
 
 const getUserPets = `-- name: GetUserPets :many
-SELECT id, name, type, last_seen FROM missing_pets WHERE owner_id = ?
+SELECT id, name, type, last_seen, size, color FROM missing_pets WHERE owner_id = ?
 `
 
 type GetUserPetsRow struct {
@@ -273,6 +300,8 @@ type GetUserPetsRow struct {
 	Name     string `json:"name"`
 	Type     string `json:"type"`
 	LastSeen string `json:"lastSeen"`
+	Size     string `json:"size"`
+	Color    string `json:"color"`
 }
 
 func (q *Queries) GetUserPets(ctx context.Context, ownerID int64) ([]GetUserPetsRow, error) {
@@ -289,6 +318,8 @@ func (q *Queries) GetUserPets(ctx context.Context, ownerID int64) ([]GetUserPets
 			&i.Name,
 			&i.Type,
 			&i.LastSeen,
+			&i.Size,
+			&i.Color,
 		); err != nil {
 			return nil, err
 		}
