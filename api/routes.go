@@ -29,8 +29,9 @@ func Register(r *mux.Router, queries *storage.Queries, db *sql.DB) {
 
 	api := r.PathPrefix("/api").Subrouter()
 	api.Use(authenticated(cookies))
-	api.Handle("/me/pets", pets.RegisterUserPet(queries, db)).Methods("POST")
-	api.Handle("/me/pets", pets.ListMyPets(queries)).Methods("GET")
-	api.Handle("/me/pets/{petId}", pets.GetPet(queries)).Methods("GET")
-	api.Handle("/me/pets/{petId}", pets.RemoveUserPet(queries)).Methods("DELETE")
+	api.Handle("/users/me", auth.Myself(queries)).Methods("GET")
+	api.Handle("/users/me/pets", pets.RegisterUserPet(queries, db)).Methods("POST")
+	api.Handle("/users/me/pets", pets.ListMyPets(queries)).Methods("GET")
+	api.Handle("/users/me/pets/{petId}", pets.GetPet(queries)).Methods("GET")
+	api.Handle("/users/me/pets/{petId}", pets.RemoveUserPet(queries)).Methods("DELETE")
 }
