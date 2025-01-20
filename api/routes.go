@@ -8,6 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/zSnails/missing-pet-tracker/api/auth"
 	"github.com/zSnails/missing-pet-tracker/api/pets"
+	"github.com/zSnails/missing-pet-tracker/api/users"
 	"github.com/zSnails/missing-pet-tracker/storage"
 )
 
