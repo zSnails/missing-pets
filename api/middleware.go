@@ -32,13 +32,14 @@ func authenticated(c *sessions.CookieStore) mux.MiddlewareFunc {
 				return
 			}
 			if sess.IsNew {
+				log.Errorf("Unauthorized access attempt to %s\n", r.URL.Path)
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
 
 			usrData, ok := sess.Values["user-data"].(storage.CreateUserRow)
 			if !ok {
-				log.Errorln("User is not authenticated")
+				log.Errorf("Unauthorized access attempt to %s\n", r.URL.Path)
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
