@@ -12,7 +12,7 @@ const Home: React.FC = () => {
             Conecta con dueños y encuentra a los amigos peludos que necesitan regresar a casa.
           </p>
           <div className="home-buttons">
-            <Link to="/lost_pets" className="home-button">
+            <Link to="/lost-pets" className="home-button">
               Ver Mascotas Perdidas
             </Link>
             <Link to="/register" className="home-button">
