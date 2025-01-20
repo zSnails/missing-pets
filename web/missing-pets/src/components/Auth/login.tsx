@@ -5,9 +5,15 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Iniciando sesión con:", { email, password });
+    const data = new FormData(e.currentTarget);
+    const response = await fetch("/api/auth/login", {
+        method: "POST",
+        body: data,
+    });
+
+    console.log(await response.json());
   };
 
   return (
@@ -19,6 +25,7 @@ const Login: React.FC = () => {
           <input
             type="email"
             id="email"
+            name="email"
             placeholder="Ingresa tu correo"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -30,6 +37,7 @@ const Login: React.FC = () => {
           <input
             type="password"
             id="password"
+            name="password"
             placeholder="Ingresa tu contraseña"
             value={password}
             onChange={(e) => setPassword(e.target.value)}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./lostPets.css";
 import SearchBar from "../components/Shared/SearchBar";
 import Card from "../components/Shared/Card";
@@ -7,20 +7,20 @@ const mockPets = [
   {
     id: "1",
     name: "Luna",
-    lastSeenLocation: "Parque Central, Ciudad de México",
-    breed: "Labrador Retriever",
+    lastSeen: "Parque Central, Ciudad de México",
+    type: "Labrador Retriever",
     color: "Amarillo",
     size: "Grande",
-    image: "https://images.unsplash.com/photo-1574158622682-e40e69881006",
+    image: ["https://images.unsplash.com/photo-1574158622682-e40e69881006"],
   },
   {
     id: "2",
     name: "Max",
-    lastSeenLocation: "Calle Los Olivos, Buenos Aires",
-    breed: "Pastor Alemán",
+    lastSeen: "Calle Los Olivos, Buenos Aires",
+    type: "Pastor Alemán",
     color: "Negro y Marrón",
     size: "Grande",
-    image: "https://images.unsplash.com/photo-1558788353-f76d92427f16",
+    image: ["https://images.unsplash.com/photo-1558788353-f76d92427f16"],
   },
 ];
 
@@ -34,6 +34,10 @@ const LostPets: React.FC = () => {
     setFilteredPets(filtered);
   };
 
+  useEffect(() => {
+      fetch("/api/pets", { method: "GET"}).then(data => data.json()).then(final => { setFilteredPets(final.data); console.log(final)});
+  }, []);
+
   return (
     <div className="lost-pets-container">
       <h1>Mascotas Perdidas</h1>
@@ -43,10 +47,10 @@ const LostPets: React.FC = () => {
           <Card
             key={pet.id}
             id={pet.id}
-            image={pet.image}
+            image={`/images/${pet.apiHash}`}
             title={pet.name}
-            description={`Último lugar visto: ${pet.lastSeenLocation}`}
-            details={[`Raza: ${pet.breed}`, `Color: ${pet.color}`, `Tamaño: ${pet.size}`]}
+            description={`Último lugar visto: ${pet.lastSeen}`}
+            details={[`Raza: ${pet.type}`, `Color: ${pet.color}`, `Tamaño: ${pet.size}`]}
           />
         ))}
       </div>

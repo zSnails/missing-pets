@@ -1,47 +1,38 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./petDetails.css";
 
-const mockPets = [
-  {
-    id: "1",
-    name: "Luna",
-    lastSeenLocation: "Parque Central, Ciudad de México",
-    breed: "Labrador Retriever",
-    color: "Amarillo",
-    size: "Grande",
-    images: [
-      "https://images.unsplash.com/photo-1574158622682-e40e69881006",
-      "https://images.unsplash.com/photo-1517423440428-a5a00ad493e8",
-    ],
-    ownerContact: "555-123-4567",
-  },
-  {
-    id: "2",
-    name: "Max",
-    lastSeenLocation: "Calle Los Olivos, Buenos Aires",
-    breed: "Pastor Alemán",
-    color: "Negro y Marrón",
-    size: "Grande",
-    images: [
-      "https://images.unsplash.com/photo-1558788353-f76d92427f16",
-      "https://images.unsplash.com/photo-1574169208507-8437617483c1",
-    ],
-    ownerContact: "555-987-6543",
-  },
-];
+class PetData {
+    public name: string;
+    public size: string;
+    public color: string;
+    public breed: string;
+    public lastSeen: string;
+    public apiHash: string;
+};
+
+class OwnerInfo {
+    public name: string;
+    public phone: string;
+}
 
 const PetDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>(); 
   const navigate = useNavigate(); 
-  const pet = mockPets.find((pet) => pet.id === id); 
 
-  if (!pet) {
-    return <p>Mascota no encontrada.</p>;
-  }
+  const [pet, setPetInfo] = useState(new PetData());
+  const [ownerInfo, setOwnerInfo] = useState(new OwnerInfo());
+
+  useEffect(() => {
+      fetch(`/api/pets/${id}`, {method: "GET"}).then(data => data.json<PetData>()).then(final => setPetInfo(final.data));
+  }, [id]);
+
+  useEffect(() => {
+      fetch(`/api/users/${id}`, {method: "GET"}).then(data => data.json<PetData>()).then(final => setOwnerInfo(final.data));
+  }, [id]);
 
   const handleContactClick = () => {
-    alert(`Contactando al dueño: ${pet.ownerContact}`);
+    alert(`Contactando al dueño: ${ownerInfo.phone}`);
   };
 
   const handleBackClick = () => {
@@ -56,21 +47,18 @@ const PetDetail: React.FC = () => {
 
       <h1>{pet.name}</h1>
       <div className="pet-detail-images">
-        {pet.images.map((image, index) => (
-          <img
-            key={index}
-            src={image}
-            alt={`Imagen ${index + 1} de ${pet.name}`}
-            className="pet-image"
-          />
-        ))}
+        <img
+          src={`/images/${pet.apiHash}`}
+          alt={`Imagen de ${pet.name}`}
+          className="pet-image"
+        />
       </div>
       <div className="pet-info">
         <p>
-          <strong>Último Lugar Visto:</strong> {pet.lastSeenLocation}
+          <strong>Último Lugar Visto:</strong> {pet.lastSeen}
         </p>
         <p>
-          <strong>Raza:</strong> {pet.breed}
+          <strong>Raza:</strong> {pet.type}
         </p>
         <p>
           <strong>Color:</strong> {pet.color}

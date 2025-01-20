@@ -5,25 +5,24 @@ const Register: React.FC = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  //const [confirmPassword] = useState("");
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (password !== confirmPassword) {
-      alert("Las contraseñas no coinciden");
-      return;
-    }
+    //if (password !== confirmPassword) {
+    //  alert("Las contraseñas no coinciden");
+    //  return;
+    //}
 
-    console.log("Registrando usuario:", {
-      name,
-      email,
-      password,
-      address,
-      phone,
+    const data = new FormData(e.currentTarget);
+    const resp = await fetch("/api/auth/register", {
+        method: "POST",
+        body: data
     });
+    console.log(await resp.json());
   };
 
   return (
@@ -34,6 +33,7 @@ const Register: React.FC = () => {
           <label htmlFor="name">Nombre</label>
           <input
             type="text"
+            name="username"
             id="name"
             placeholder="Ingresa tu nombre"
             value={name}
@@ -45,6 +45,7 @@ const Register: React.FC = () => {
           <label htmlFor="email">Correo Electrónico</label>
           <input
             type="email"
+            name="email"
             id="email"
             placeholder="Ingresa tu correo"
             value={email}
@@ -57,6 +58,7 @@ const Register: React.FC = () => {
           <input
             type="password"
             id="password"
+            name="password"
             placeholder="Crea una contraseña"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -67,6 +69,7 @@ const Register: React.FC = () => {
           <label htmlFor="address">Dirección</label>
           <input
             type="text"
+            name="address"
             id="address"
             placeholder="Ingresa tu dirección"
             value={address}
@@ -78,6 +81,7 @@ const Register: React.FC = () => {
           <label htmlFor="phone">Teléfono</label>
           <input
             type="tel"
+            name="phone"
             id="phone"
             placeholder="Ingresa tu número de teléfono"
             value={phone}

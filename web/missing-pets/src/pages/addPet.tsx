@@ -9,7 +9,7 @@ const AddPet: React.FC = () => {
   const [size, setSize] = useState("");
   const [images, setImages] = useState<File[]>([]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (images.length === 0) {
@@ -17,24 +17,13 @@ const AddPet: React.FC = () => {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("petName", petName);
-    formData.append("lastSeenLocation", lastSeenLocation);
-    formData.append("breed", breed);
-    formData.append("color", color);
-    formData.append("size", size);
-    images.forEach((image, index) => {
-      formData.append(`images[${index}]`, image);
-    });
+    const formData = new FormData(e.currentTarget)
 
-    console.log("Datos de la mascota perdida:", {
-      petName,
-      lastSeenLocation,
-      breed,
-      color,
-      size,
-      images,
+    const response = await fetch('/api/users/me/pets', {
+      method: 'POST',
+      body: formData,
     });
+    console.log(await response.json());
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,6 +42,7 @@ const AddPet: React.FC = () => {
           <input
             type="text"
             id="petName"
+            name="name"
             placeholder="Ingresa el nombre"
             value={petName}
             onChange={(e) => setPetName(e.target.value)}
@@ -64,6 +54,7 @@ const AddPet: React.FC = () => {
           <input
             type="text"
             id="lastSeenLocation"
+            name="last-seen"
             placeholder="Ingresa el último lugar visto"
             value={lastSeenLocation}
             onChange={(e) => setLastSeenLocation(e.target.value)}
@@ -75,6 +66,7 @@ const AddPet: React.FC = () => {
           <input
             type="text"
             id="breed"
+            name="type"
             placeholder="Ingresa la raza"
             value={breed}
             onChange={(e) => setBreed(e.target.value)}
@@ -87,6 +79,7 @@ const AddPet: React.FC = () => {
             type="text"
             id="color"
             placeholder="Ingresa el color"
+            name="color"
             value={color}
             onChange={(e) => setColor(e.target.value)}
             required
@@ -97,6 +90,7 @@ const AddPet: React.FC = () => {
           <select
             id="size"
             value={size}
+            name="size"
             onChange={(e) => setSize(e.target.value)}
             required
           >
@@ -111,6 +105,7 @@ const AddPet: React.FC = () => {
           <input
             type="file"
             id="images"
+            name="images"
             accept="image/*"
             multiple
             onChange={handleImageChange}
