@@ -14,21 +14,17 @@ import (
 
 func GetPet(q *storage.Queries) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		usrData := r.Context().Value("user-data").(storage.CreateUserRow)
 		vars := mux.Vars(r)
 		petId, _ := strconv.ParseInt(vars["petId"], 10, 64)
 
-		pet, err := q.GetPetByOwnerAndId(r.Context(), storage.GetPetByOwnerAndIdParams{
-			ID:      petId,
-			OwnerID: usrData.ID,
-		})
+		pet, err := q.GetPetByID(r.Context(), petId)
 		if err != nil {
 			log.Errorln(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		err = json.NewEncoder(w).Encode(response.Response[storage.GetPetByOwnerAndIdRow]{
+		err = json.NewEncoder(w).Encode(response.Response[storage.GetPetByIDRow]{
 			Code: http.StatusOK,
 			Data: pet,
 		})

@@ -19,19 +19,19 @@ func Register(r *mux.Router, queries *storage.Queries, db *sql.DB) {
 		log.Errorf("route not found %s\n", r.URL.Path)
 		http.Error(w, "Not Found", http.StatusNotFound)
 	})
-	r.Use(logger)
 
+	r.Use(logger)
 	r.Handle("/api/auth/login", auth.Login(queries, cookies)).Methods("POST")
 	r.Handle("/api/auth/login", auth.Logout(queries, cookies)).Methods("DELETE")
 	r.Handle("/api/auth/register", auth.Register(queries, cookies)).Methods("POST")
 	r.Handle("/api/users/{id}/pets", pets.ListUserPets(queries)).Methods("GET")
 	r.Handle("/api/pets", pets.ListAllPetsFilter(queries)).Methods("GET")
+	r.Handle("/api/pets/{petId}", pets.GetPet(queries)).Methods("GET")
 
 	api := r.PathPrefix("/api").Subrouter()
 	api.Use(authenticated(cookies))
-	api.Handle("/users/me", auth.Myself(queries)).Methods("GET")
+	api.Handle("/users/me", users.Myself(queries)).Methods("GET")
 	api.Handle("/users/me/pets", pets.RegisterUserPet(queries, db)).Methods("POST")
 	api.Handle("/users/me/pets", pets.ListMyPets(queries)).Methods("GET")
-	api.Handle("/users/me/pets/{petId}", pets.GetPet(queries)).Methods("GET")
 	api.Handle("/users/me/pets/{petId}", pets.RemoveUserPet(queries)).Methods("DELETE")
 }
