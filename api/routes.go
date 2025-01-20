@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"github.com/zSnails/missing-pet-tracker/api/auth"
+	"github.com/zSnails/missing-pet-tracker/api/images"
 	"github.com/zSnails/missing-pet-tracker/api/pets"
 	"github.com/zSnails/missing-pet-tracker/api/users"
 	"github.com/zSnails/missing-pet-tracker/storage"
@@ -22,9 +23,11 @@ func Register(r *mux.Router, queries *storage.Queries, db *sql.DB) {
 	})
 
 	r.Use(logger)
+	r.Handle("/images/{hash}", images.Serve(queries)).Methods("GET")
 	r.Handle("/api/auth/login", auth.Login(queries, cookies)).Methods("POST")
 	r.Handle("/api/auth/login", auth.Logout(queries, cookies)).Methods("DELETE")
 	r.Handle("/api/auth/register", auth.Register(queries, cookies)).Methods("POST")
+	r.Handle("/api/users/{id}", users.Info(queries)).Methods("GET")
 	r.Handle("/api/users/{id}/pets", pets.ListUserPets(queries)).Methods("GET")
 	r.Handle("/api/pets", pets.ListAllPetsFilter(queries)).Methods("GET")
 	r.Handle("/api/pets/{petId}", pets.GetPet(queries)).Methods("GET")
