@@ -241,25 +241,20 @@ func (q *Queries) GetAllPetsNameFilter(ctx context.Context, arg GetAllPetsNameFi
 	return items, nil
 }
 
-const getPetByOwnerAndId = `-- name: GetPetByOwnerAndId :one
-SELECT id, name, type, last_seen FROM missing_pets WHERE id = ? AND owner_id = ?
+const getPetByID = `-- name: GetPetByID :one
+SELECT id, name, type, last_seen FROM missing_pets WHERE id = ?
 `
 
-type GetPetByOwnerAndIdParams struct {
-	ID      int64 `json:"id"`
-	OwnerID int64 `json:"ownerId"`
-}
-
-type GetPetByOwnerAndIdRow struct {
+type GetPetByIDRow struct {
 	ID       int64  `json:"id"`
 	Name     string `json:"name"`
 	Type     string `json:"type"`
 	LastSeen string `json:"lastSeen"`
 }
 
-func (q *Queries) GetPetByOwnerAndId(ctx context.Context, arg GetPetByOwnerAndIdParams) (GetPetByOwnerAndIdRow, error) {
-	row := q.db.QueryRowContext(ctx, getPetByOwnerAndId, arg.ID, arg.OwnerID)
-	var i GetPetByOwnerAndIdRow
+func (q *Queries) GetPetByID(ctx context.Context, id int64) (GetPetByIDRow, error) {
+	row := q.db.QueryRowContext(ctx, getPetByID, id)
+	var i GetPetByIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.Name,

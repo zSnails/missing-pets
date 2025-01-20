@@ -37,8 +37,8 @@ SELECT id, name, type, last_seen FROM missing_pets WHERE owner_id = ?;
 -- name: RemoveUserPet :exec
 DELETE FROM missing_pets WHERE id = ? AND owner_id = ?;
 
--- name: GetPetByOwnerAndId :one
-SELECT id, name, type, last_seen FROM missing_pets WHERE id = ? AND owner_id = ?;
+-- name: GetPetByID :one
+SELECT id, name, type, last_seen FROM missing_pets WHERE id = ?;
 
 -- name: GetAllPetsNameFilter :many
 SELECT missing_pets.id, missing_pets.name, missing_pets.type, missing_pets.last_seen, pet_owners.id as owner_id
