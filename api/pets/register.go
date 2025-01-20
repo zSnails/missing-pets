@@ -30,11 +30,21 @@ func validatePetData(r *http.Request) (storage.CreateMissingPetParams, error) {
 	if lastSeen == "" {
 		return empty, errors.New("last-seen field is empty")
 	}
+	size := r.FormValue("size")
+	if size == "" {
+		return empty, errors.New("size field is empty")
+	}
+	color := r.FormValue("color")
+	if color == "" {
+		return empty, errors.New("color field is empty")
+	}
 
 	return storage.CreateMissingPetParams{
 		Name:     name,
 		Type:     _type,
 		LastSeen: lastSeen,
+		Size:     size,
+		Color:    color,
 	}, nil
 }
 
