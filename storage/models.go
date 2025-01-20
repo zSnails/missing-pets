@@ -9,13 +9,16 @@ type MissingPet struct {
 	Name     string `json:"name"`
 	Type     string `json:"type"`
 	LastSeen string `json:"lastSeen"`
+	Size     string `json:"size"`
+	Color    string `json:"color"`
 	OwnerID  int64  `json:"ownerId"`
 }
 
 type MissingPetPhoto struct {
-	ID          int64  `json:"id"`
-	PetID       int64  `json:"petId"`
-	EncodedData []byte `json:"encodedData"`
+	ID        int64  `json:"id"`
+	PetID     int64  `json:"petId"`
+	ApiHash   string `json:"apiHash"`
+	ImageData []byte `json:"imageData"`
 }
 
 type PetOwner struct {

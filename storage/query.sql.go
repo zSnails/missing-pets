@@ -260,8 +260,24 @@ func (q *Queries) GetAllPetsNameFilter(ctx context.Context, arg GetAllPetsNameFi
 	return items, nil
 }
 
+const getContactInfo = `-- name: GetContactInfo :one
+SELECT name, phone FROM pet_owners WHERE id = ?
+`
+
+type GetContactInfoRow struct {
+	Name  string `json:"name"`
+	Phone string `json:"phone"`
+}
+
+func (q *Queries) GetContactInfo(ctx context.Context, id int64) (GetContactInfoRow, error) {
+	row := q.db.QueryRowContext(ctx, getContactInfo, id)
+	var i GetContactInfoRow
+	err := row.Scan(&i.Name, &i.Phone)
+	return i, err
+}
+
 const getPetByID = `-- name: GetPetByID :one
-SELECT id, name, type, last_seen FROM missing_pets WHERE id = ?
+SELECT id, name, type, last_seen, size, color, owner_id, (SELECT api_hash FROM missing_pet_photos WHERE pet_id = missing_pets.id LIMIT 1) FROM missing_pets WHERE missing_pets.id = ?
 `
 
 type GetPetByIDRow struct {
@@ -348,21 +364,44 @@ func (q *Queries) RemoveUserPet(ctx context.Context, arg RemoveUserPetParams) er
 	return err
 }
 
+const retrieveImage = `-- name: RetrieveImage :one
+SELECT id, pet_id, image_data FROM missing_pet_photos WHERE api_hash = ?
+`
+
+type RetrieveImageRow struct {
+	ID        int64  `json:"id"`
+	PetID     int64  `json:"petId"`
+	ImageData []byte `json:"imageData"`
+}
+
+func (q *Queries) RetrieveImage(ctx context.Context, apiHash string) (RetrieveImageRow, error) {
+	row := q.db.QueryRowContext(ctx, retrieveImage, apiHash)
+	var i RetrieveImageRow
+	err := row.Scan(&i.ID, &i.PetID, &i.ImageData)
+	return i, err
+}
+
 const uploadPhoto = `-- name: UploadPhoto :one
 INSERT INTO
-missing_pet_photos (pet_id, encoded_data)
-VALUES (?, ?)
-RETURNING id
+missing_pet_photos (pet_id, image_data, api_hash)
+VALUES (?, ?, ?)
+RETURNING id, api_hash
 `
 
 type UploadPhotoParams struct {
-	PetID       int64  `json:"petId"`
-	EncodedData []byte `json:"encodedData"`
+	PetID     int64  `json:"petId"`
+	ImageData []byte `json:"imageData"`
+	ApiHash   string `json:"apiHash"`
 }
 
-func (q *Queries) UploadPhoto(ctx context.Context, arg UploadPhotoParams) (int64, error) {
-	row := q.db.QueryRowContext(ctx, uploadPhoto, arg.PetID, arg.EncodedData)
-	var id int64
-	err := row.Scan(&id)
-	return id, err
+type UploadPhotoRow struct {
+	ID      int64  `json:"id"`
+	ApiHash string `json:"apiHash"`
+}
+
+func (q *Queries) UploadPhoto(ctx context.Context, arg UploadPhotoParams) (UploadPhotoRow, error) {
+	row := q.db.QueryRowContext(ctx, uploadPhoto, arg.PetID, arg.ImageData, arg.ApiHash)
+	var i UploadPhotoRow
+	err := row.Scan(&i.ID, &i.ApiHash)
+	return i, err
 }

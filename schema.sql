@@ -23,9 +23,12 @@ CREATE INDEX IF NOT EXISTS missing_pets_idx ON missing_pets (name, type, last_se
 CREATE TABLE missing_pet_photos (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     pet_id INT NOT NULL,
-    encoded_data BLOB NOT NULL,
+    api_hash TEXT NOT NULL,
+    image_data BLOB NOT NULL,
     FOREIGN KEY (pet_id) REFERENCES missing_pets(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+CREATE INDEX IF NOT EXISTS missing_pet_photos_idx ON missing_pet_photos (pet_id, api_hash);
 
 -- TODO: create posts table, cuz there have to be posts, this will work more as
 -- a forum than anything else
