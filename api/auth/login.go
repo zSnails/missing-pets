@@ -71,22 +71,23 @@ func Login(q *storage.Queries, cookies sessions.Store) http.HandlerFunc {
 		}
 
 		log.Debugln("Making session")
-		err = makeSession(w, r, cookies, &storage.CreateUserRow{
+		sessUser := storage.CreateUserRow{
 			ID:      user.ID,
 			Name:    user.Name,
 			Phone:   user.Phone,
 			Email:   user.Email,
 			Address: user.Address,
-		})
+		}
+		err = makeSession(w, r, cookies, &sessUser)
 		if err != nil {
 			log.Errorf("Could not make session: %s\n", err.Error())
 			http.Error(w, err.Error(), http.StatusForbidden)
 			return
 		}
 
-		err = json.NewEncoder(w).Encode(response.Response[storage.PetOwner]{
+		err = json.NewEncoder(w).Encode(response.Response[storage.CreateUserRow]{
 			Code: http.StatusOK,
-			Data: user,
+			Data: sessUser,
 		})
 		if err != nil {
 			log.Errorln(err)
