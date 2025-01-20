@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./LostPets.css";
+import "./lostPets.css";
 import SearchBar from "../components/Shared/SearchBar";
 import Card from "../components/Shared/Card";
 
