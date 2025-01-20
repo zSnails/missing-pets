@@ -34,20 +34,6 @@ func makeSession(w http.ResponseWriter, r *http.Request, cookies sessions.Store,
 	return nil
 }
 
-func Myself(q *storage.Queries) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		userData := r.Context().Value("user-data").(storage.CreateUserRow)
-		if err := json.NewEncoder(w).Encode(response.Response[storage.CreateUserRow]{
-			Code: http.StatusOK,
-			Data: userData,
-		}); err != nil {
-			log.Errorln(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	})
-}
-
 func Login(q *storage.Queries, cookies sessions.Store) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		email := r.FormValue("email")
