@@ -14,6 +14,8 @@ CREATE TABLE missing_pets (
     name TEXT NOT NULL,
     type TEXT NOT NULL,
     last_seen TEXT NOT NULL,
+    size TEXT CHECK (size in ('Grande', 'Pequeño', 'Mediano')) NOT NULL,
+    color TEXT NOT NULL,
     owner_id INTEGER NOT NULL,
     FOREIGN KEY (owner_id) REFERENCES pet_owners (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
