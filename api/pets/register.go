@@ -1,10 +1,11 @@
 package pets
 
 import (
+	"crypto/sha256"
 	"database/sql"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -89,12 +90,15 @@ func RegisterUserPet(h *storage.Queries, db *sql.DB) http.HandlerFunc {
 		}
 
 		if r.MultipartForm != nil {
+			log.Infoln("Pet has images")
 			headers, err := getFormFiles(r, "images")
 			if err != nil {
 				log.Errorln(err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
+
+			log.Debugf("Got a total of %d images\n", len(headers))
 
 			for _, header := range headers {
 				func() {
@@ -104,17 +108,26 @@ func RegisterUserPet(h *storage.Queries, db *sql.DB) http.HandlerFunc {
 						return
 					}
 					defer file.Close()
+					log.Debugf("Registering photo %s\n", header.Filename)
 
 					read, err := io.ReadAll(file)
-					data := base64.RawStdEncoding.EncodeToString(read)
-					if _, err = q.UploadPhoto(r.Context(), storage.UploadPhotoParams{
-						PetID:       pet.ID,
-						EncodedData: []byte(data),
-					}); err != nil {
+					if err != nil {
 						log.Errorln(err)
+						return
+					}
+					sum := sha256.Sum256(read)
+					log.Debugf("Computed hash %x\n", sum)
+					if _, err = q.UploadPhoto(r.Context(), storage.UploadPhotoParams{
+						PetID:     pet.ID,
+						ImageData: read,
+						ApiHash:   fmt.Sprintf("%x", sum),
+					}); err != nil {
+						log.Errorf("could not register %s due to %s\n", header.Filename, err.Error())
 					}
 				}()
 			}
+		} else {
+			log.Warnln("Pet has no images")
 		}
 
 		err = json.NewEncoder(w).Encode(response.Response[storage.CreateMissingPetRow]{
