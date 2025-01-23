@@ -6,6 +6,8 @@ import Login from "./components/Auth/login";
 import Register from "./components/Auth/register";
 import AddPet from "./pages/addPet";
 import PetDetail from "./pages/petDetails";
+
+import "./App.css";
 function App() {
   return (
     <Router>
