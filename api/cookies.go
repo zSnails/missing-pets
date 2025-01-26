@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/sessions"
 )
 
+// TODO: store cookies in the database and only send their id
 func MakeStore() *sessions.CookieStore {
 	return sessions.NewCookieStore(
 		[]byte(os.Getenv("COOKIE_AUTH_KEY")),
